@@ -1,7 +1,6 @@
 package com.codecool.jpaexample.model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,30 +14,42 @@ public class Student {
 
     private String name;
 
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @ElementCollection
+    @CollectionTable(name = "Phone")
+    private List<String> phoneNumbers;
 
     @Temporal(TemporalType.DATE)
     private Date dateOfBirth;
 
+    @Transient
     private long age;
 
     @OneToOne
     private Address address;
 
+    @ManyToOne
+    private Klass klass;
+
     public Student() {
     }
 
-    public Student(String name, String email, Date dateOfBirth) {
+    public Student(String name, String email, Date dateOfBirth, List<String> phoneNumbers) {
         this.name = name;
         this.email = email;
         this.dateOfBirth = dateOfBirth;
+        this.phoneNumbers = phoneNumbers;
         this.age = (Calendar.getInstance().getTimeInMillis() - dateOfBirth.getTime())
                 / (60L * 60L * 1000L * 24L * 365L);
     }
 
-    public Student(String name, String email, Date dateOfBirth, Address address) {
-        this(name, email, dateOfBirth);
+    public Student(String name, String email, Date dateOfBirth, List<String> phoneNumbers, Address address, Klass klass) {
+        this(name, email, dateOfBirth, phoneNumbers);
         this.address = address;
+        this.klass = klass;
+        address.setStudent(this);
     }
 
     public long getId() {
@@ -90,9 +101,10 @@ public class Student {
         return "Student{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
                 ", age=" + age +
-                ", address id=" + address.getId() +
+                ", address=" + address.getId() +
+                ", klass=" + klass.getName() +
                 '}';
     }
-
 }
